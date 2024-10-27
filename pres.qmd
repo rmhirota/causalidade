@@ -1,0 +1,54 @@
+---
+title: "Double Machine Learning"
+format:
+  revealjs: 
+    theme: solarized
+---
+
+## Motivação
+
+Suponhamos que temos um modelo linear:
+
+$$
+Y_i = \tau T_i + \beta_1 X_{1i} + \beta_2 X_{2i} + \beta_3 X_{3i} + e_i
+$$
+
+em que $\tau$ é o efeito causal que temos interesse em estimar.
+
+. . .
+
+<br><br>
+
+Pode ser que o número de covariáveis a serem ajustadas seja muito grande e o trabalho de feature engineering seja complexo (decidir quais interações colocar, se os termos polinomiais de grau maior que 2 serão inclusos ou não, etc.)
+
+---
+
+## Teorema: Frisch-Waugh-Lovell
+
+. . . 
+
+### Intuição
+
+A partir do modelo inicial, 
+
+$$
+Y_i = \tau T_i + \beta_1 X_{1i} + \beta_2 X_{2i} + \beta_3 X_{3i} + e_i
+$$
+
+vamos ajustar dois modelos de regressão linear:
+
+1. $Y_i \sim X_1 + X_2 + X_3$ 
+1. $T_i \sim X_1 + X_2 + X_3$ 
+
+Temos resíduo do modelo (1), $r_Y = Y - \hat{Y}$ e o resíduo do modelo (2), $r_T = T - \hat{T}$
+
+
+A regressão do $r_Y$ em $r_T$ resulta em $\tau$
+
+## Exemplo
+
+```{r}
+#| label: ex1
+#| echo: true
+```
+
