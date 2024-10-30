@@ -7,6 +7,8 @@ format:
 
 ## Motivação
 
+. . .
+
 Suponhamos que temos um modelo linear:
 
 $$
@@ -20,8 +22,6 @@ em que $\tau$ é o efeito causal que temos interesse em estimar.
 <br><br>
 
 Pode ser que o número de covariáveis a serem ajustadas seja muito grande e o trabalho de feature engineering seja complexo (decidir quais interações colocar, se os termos polinomiais de grau maior que 2 serão inclusos ou não, etc.)
-
----
 
 ## Teorema: Frisch-Waugh-Lovell
 
@@ -50,5 +50,59 @@ A regressão do $r_Y$ em $r_T$ resulta em $\tau$
 ```{r}
 #| label: ex1
 #| echo: true
+
+sample_n <- 10000
+
+x1 <- rnorm(n = sample_n)
+x2 <- rnorm(n = sample_n, 10)
+x3 <- rnorm(n = sample_n, 4)
+t <- rnorm(sample_n, 5, .5)
+y <- t * 2 + 0.2 * x1 + 0.5 * x2 + 10 * x3 + rnorm(sample_n)
+
+fit_y <- lm(y ~ x1 + x2 + x3)
+fit_t <- lm(t ~ x1 + x2 + x3)
+
+fit <- lm(resid(fit_y) ~ resid(fit_t))
+summary(fit)
 ```
+
+## Restrições 
+
+- Linearidade
+- Número de parâmetros/variáveis
+
+. . .
+
+### Exemplo
+
+(colocar exemplo do Facure -- temperatura)  
+
+- Feature engineering  
+- Interação
+
+## Alternativa
+
+Modelos não paramétricos para obter os resíduos $r_Y$ e $r_T$
+
+- Árvores
+- Bagging
+- etc
+
+## Por que podemos generalizar para modelos não paramétricos?
+
+Prova / exemplo
+
+## Restrições clássicas de modelos paramétricos
+
+- Overfitting
+
+. . . 
+
+### Possíveis soluções
+
+- Cross validation
+
+
+## Simulação de cenários reais
+
 
