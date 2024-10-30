@@ -1,5 +1,6 @@
 ---
 title: "Double Machine Learning"
+subtitle: Inferência Causal - 2024/2
 format:
   revealjs: 
     theme: solarized
@@ -106,3 +107,4 @@ Prova / exemplo
 ## Simulação de cenários reais
 
 
+## Referências
