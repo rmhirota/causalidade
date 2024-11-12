@@ -8,6 +8,8 @@ format:
 
 ## Motivação
 
+_Mari_
+
 . . .
 
 Suponhamos que temos um modelo linear:
@@ -25,6 +27,8 @@ em que $\tau$ é o efeito causal que temos interesse em estimar.
 Pode ser que o número de covariáveis a serem ajustadas seja muito grande e o trabalho de feature engineering seja complexo (decidir quais interações colocar, se os termos polinomiais de grau maior que 2 serão inclusos ou não, etc.)
 
 ## Teorema: Frisch-Waugh-Lovell
+
+_Ciro_
 
 . . . 
 
@@ -76,12 +80,14 @@ summary(fit)
 
 ### Exemplo
 
-(colocar exemplo do Facure -- temperatura)  
+(colocar exemplo do Facure -- temperatura) 
 
 - Feature engineering  
 - Interação
 
 ## Alternativa
+
+_Sotelo_
 
 Modelos não paramétricos para obter os resíduos $r_Y$ e $r_T$
 
@@ -91,10 +97,12 @@ Modelos não paramétricos para obter os resíduos $r_Y$ e $r_T$
 
 ## Por que podemos generalizar para modelos não paramétricos?
 
+**Detalhar?**
 Prova / exemplo
 
 ## Restrições clássicas de modelos paramétricos
 
+_Renata_
 - Overfitting
 
 . . . 

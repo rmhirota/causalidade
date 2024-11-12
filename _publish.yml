@@ -1,0 +1,4 @@
+- source: pres.qmd
+  quarto-pub:
+    - id: 873ddab4-b5d0-44c4-bf04-ba1bbb51523e
+      url: 'https://rmhirota.quarto.pub/double-machine-learning'
