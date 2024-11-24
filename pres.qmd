@@ -4,115 +4,245 @@ subtitle: Inferência Causal - 2024/2
 format:
   revealjs: 
     theme: solarized
+    transition: slide
+    embed-resources: true
 ---
 
-## Motivação
+# Motivação {.smaller}
 
 _Mari_
 
-. . .
-
-Suponhamos que temos um modelo linear:
-
-$$
-Y_i = \tau T_i + \beta_1 X_{1i} + \beta_2 X_{2i} + \beta_3 X_{3i} + e_i
-$$
-
-em que $\tau$ é o efeito causal que temos interesse em estimar.
+## {.smaller}
 
 . . .
 
-<br><br>
+A inferência causal é uma área de estudo de interesse em várias áreas do conhecimento, como por exemplo a saúde, a economia.
 
-Pode ser que o número de covariáveis a serem ajustadas seja muito grande e o trabalho de feature engineering seja complexo (decidir quais interações colocar, se os termos polinomiais de grau maior que 2 serão inclusos ou não, etc.)
+<br>
 
-## Teorema: Frisch-Waugh-Lovell
+. . .
 
+No entanto, a complexidade dos problemas a serem resolvidos e o volume de dados a ser usado é cada vez maior. 
+
+. . .
+
+Na inferência tradicional, podemos nos utilizar de técnicas de Machine Learning para contornar esse problema, uma vez que estes modelos são bons para lidar com problemas complexos e não exigem premissas fortes, como por exemplo linearidade.
+
+<br>
+
+. . .
+
+Como podemos então utilizar Machine Learning para medir efeito causal? 
+
+. . .
+
+É isto que propõe a técnica de **Double Machine Learning (DML)**!
+
+## Intordução {.smaller}
+
+. . .
+
+Suponha que queremos medir o efeito do preço de nosso sorvete nas nossas vendas, controlando pelos confundidores: temperatura, custo e dia da semana. 
+
+. . .
+
+A princípio suponha que usemos um modelo linear para remover o viés de nosso efeito causal:
+
+<br>
+
+:::{style="font-size:90%;"}
+$$
+Vendas_i=\alpha+\tau preço_i+\beta_1 temp_i + \beta_2 custo_i +\beta_3 dsem_i+\epsilon_i
+$$
+:::
+
+<br>
+
+. . .
+
+Só estamos interessados no parâmetro $\tau$, mas como a estimação dos parâmetros é feita simultaneamente, precisamos nos preocupar na estimação dos demais parâmetros, pois afetarão a estimação do efeito causal.
+
+## {.smaller}
+
+:::: {.collumns}
+
+::: {.column}
+
+Por exemplo, a relação de $temp$ provavelmente não é linear, pois em dias muito frios as pessoas não costumam sair, o que afetará nossas vendas, mas o mesmo pode ser dito para dias muito quentes, em que está tão quente que as pessoas preferem ficar em casa, no ar condicionado.
+
+:::
+
+::: {.column}
+
+![](images/non-linear.png){width="90%" fig-align="center"}
+
+:::
+
+::::
+
+. . .
+
+Dado isso, um modelo mais preciso seria o seguinte:
+
+:::{style="font-size:90%;"}
+$$
+Vendas_i=\alpha+\tau preço_i+\beta_1 temp_i^2 + \beta_2 custo_i +\beta_3 dsem_i+\epsilon_i
+$$
+:::
+
+. . .
+
+Ou seja, note que quanto maior o número de variáveis mais complexo é definir essas interações. Devemos colocar quais polinômios, quais interações?
+
+É um processo muito complexo que exige um estudo aprofundado de conhecimento de domínio.
+
+# Teorema de Frisch-Waugh-Lovell {.smaller}
 _Ciro_
 
 . . . 
 
-### Intuição
+## {.smaller}
 
-A partir do modelo inicial, 
+. . .
+
+Considere o seguinte modelo inicial, 
 
 $$
 Y_i = \tau T_i + \beta_1 X_{1i} + \beta_2 X_{2i} + \beta_3 X_{3i} + e_i
 $$
 
-vamos ajustar dois modelos de regressão linear:
+. . .
 
-1. $Y_i \sim X_1 + X_2 + X_3$ 
-1. $T_i \sim X_1 + X_2 + X_3$ 
+Vamos ajustar duas regressões lineares:
 
-Temos resíduo do modelo (1), $r_Y = Y - \hat{Y}$ e o resíduo do modelo (2), $r_T = T - \hat{T}$
+:::{style="font-size:90%;"}
+$$
+Y_i \sim X_{1i} + X_{2i} + X_{3i} \\
+T_i \sim X_{1i} + X_{2i} + X_{3i}
+$$
+:::
 
+. . .
 
-A regressão do $r_Y$ em $r_T$ resulta em $\tau$
+A partir desses modelos obtemos dois resíduos, que chamaremos de $r_Y$ e $r_T$, respectivamente. 
 
-## Exemplo
+. . .
 
+Agora, considere a seguinte regressão:
+
+:::{style="font-size:90%;"}
+$$
+r_Y \sim r_T
+$$
+:::
+
+. . .
+
+O teorema de Frisch-Waugh-Lovell nos garante que esta regressão retorna o parâmetro $\tau$!
+
+# Exemplo {.smaller}
+
+. . .
+
+:::{style="font-size:90%;"}
 ```{r}
 #| label: ex1
 #| echo: true
+#| code-line-numbers: "|7|9|10|12"
+#| code-fold: true
+#| output-location: fragment
 
 sample_n <- 10000
 
 x1 <- rnorm(n = sample_n)
 x2 <- rnorm(n = sample_n, 10)
-x3 <- rnorm(n = sample_n, 4)
 t <- rnorm(sample_n, 5, .5)
-y <- t * 2 + 0.2 * x1 + 0.5 * x2 + 10 * x3 + rnorm(sample_n)
+y <- t * 2 + 0.2 * x1 + 0.5 * x2 + rnorm(sample_n)
 
-fit_y <- lm(y ~ x1 + x2 + x3)
-fit_t <- lm(t ~ x1 + x2 + x3)
+fit_y <- lm(y ~ x1 + x2)
+fit_t <- lm(t ~ x1 + x2)
 
 fit <- lm(resid(fit_y) ~ resid(fit_t))
 summary(fit)
 ```
+:::
 
-## Restrições 
-
-- Linearidade
-- Número de parâmetros/variáveis
+## Limitações e pesquisas relacionadas {.smaller}
 
 . . .
 
-### Exemplo
+Que maravilha! Então podemos substituir as regressões intermdiárias por modelos não-paramétricos e agora não temos mais que nos preocupar com os demais parâmetros.
 
-(colocar exemplo do Facure -- temperatura) 
+. . .
 
-- Feature engineering  
-- Interação
+Mas peraí, podemos fazer isso?
 
-## Alternativa
+. . .
+
+Note que o teorema de Frisch-Waugh-Lovell (FWL) vale apenas para o cenário cujas relações são lineares.
+
+. . .
+
+Para nossa felicidade pessoas incríveis já extenderam esses resultados.
+
+. . .
+
+A princípio o resultado do FWL foi extendido para métodos "tradicionais" não-paramétricos, como Lasso (Bickel et al. - 1998).
+
+Os resultados teóricos nesse momento se limitavam a estimadores que tomassem valor num conjunto de Donsker, o que eliminava muitos dos novos métodos.
+
+. . .
+
+Mais recentemente, conseguiram expandir os resultados para métodos mais novos como florestas, gradient boosting e outros (Chernozhukov et al. - 2014).
+
+# Double/Orthgonal Machine Learning {.smaller}
 
 _Sotelo_
 
-Modelos não paramétricos para obter os resíduos $r_Y$ e $r_T$
+## {.smaller}
 
-- Árvores
-- Bagging
-- etc
+. . .
 
-## Por que podemos generalizar para modelos não paramétricos?
+Note que no teorema de FWL temos duas etapas intermediárias, que buscam estimar essas duas informações:
 
-**Detalhar?**
-Prova / exemplo
+:::{style="font-size:90%;"}
+$$
+E[Y|X_2] \\
+E[T|X_2]
+$$
+:::
 
-## Restrições clássicas de modelos paramétricos
+. . .
+
+O que o DML propõe é utilizarmos métodos não paramétricos para estimá-las.
+
+. . .
+
+Com o uso de modelos não paramétricos teríamos uma maneira de contornar as restrições de ter que nos atentar em todos parâmetros, deixando isso para esses modelos intermediários e focar nossa atenção em estimar o parâmetro causal.
+
+. . .
+
+Com isso, bastaríamos fazer a regressão linear dos resíduos desses modelos e teríamos o efeito causal $\tau$.
+
+Vale ressaltar que quando analisado o efeito causal, não estamos falando de um efeito linear de fato, mas sim de um efeito linear local, sendo necessario cuidado ao analisá-lo para nao generalizá-lo para todo o intervalo real.
+
+## Exemplo {.smaller}
+
+_Inserir exemplo de aplicação do DML_
+
+# Restrições clássicas de modelos paramétricos {.smaller}
 
 _Renata_
 - Overfitting
 
 . . . 
 
-### Possíveis soluções
+## Possíveis soluções {.smaller}
 
 - Cross validation
 
 
-## Simulação de cenários reais
+# Simulação de cenários reais {.smaller}
 
 
-## Referências
+# Referências {.smaller}
