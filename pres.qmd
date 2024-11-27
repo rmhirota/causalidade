@@ -311,7 +311,7 @@ Para exemplificar o DML em ação, simularemos dados.
 :::{style="font-size:90%;"}
 ```{r}
 #| echo: true
-#| code-line-numbers: "|16"
+#| code-line-numbers: "|12"
 
 gen_data <- function(n, d, p, delta, base) {
   X <- matrix(rnorm(n * d), nrow = n, ncol = d)
