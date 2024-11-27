@@ -6,11 +6,11 @@ format:
     theme: solarized
     transition: slide
     embed-resources: true
+execute:
+  cache: true
 ---
 
 # Motivação {.smaller}
-
-_Mari_
 
 ## {.smaller}
 
@@ -38,7 +38,7 @@ Como podemos então utilizar Machine Learning para medir efeito causal?
 
 É isto que propõe a técnica de **Double Machine Learning (DML)**!
 
-## Intordução {.smaller}
+## Introdução {.smaller}
 
 . . .
 
@@ -97,7 +97,6 @@ Ou seja, note que quanto maior o número de variáveis mais complexo é definir 
 É um processo muito complexo que exige um estudo aprofundado de conhecimento de domínio.
 
 # Teorema de Frisch-Waugh-Lovell {.smaller}
-_Ciro_
 
 . . . 
 
@@ -108,7 +107,7 @@ _Ciro_
 Considere o seguinte modelo inicial, 
 
 $$
-Y_i = \tau T_i + \beta_1 X_{1i} + \beta_2 X_{2i} + \beta_3 X_{3i} + e_i
+Y_i = \tau T_i + \beta X_{i} + e_i
 $$
 
 . . .
@@ -117,8 +116,8 @@ Vamos ajustar duas regressões lineares:
 
 :::{style="font-size:90%;"}
 $$
-Y_i \sim X_{1i} + X_{2i} + X_{3i} \\
-T_i \sim X_{1i} + X_{2i} + X_{3i}
+Y_i \sim X_{i} \\
+T_i \sim X_{i}
 $$
 :::
 
@@ -140,7 +139,7 @@ $$
 
 O teorema de Frisch-Waugh-Lovell nos garante que esta regressão retorna o parâmetro $\tau$!
 
-# Exemplo {.smaller}
+## Exemplo {.smaller}
 
 . . .
 
@@ -148,19 +147,18 @@ O teorema de Frisch-Waugh-Lovell nos garante que esta regressão retorna o parâ
 ```{r}
 #| label: ex1
 #| echo: true
-#| code-line-numbers: "|7|9|10|12"
+#| code-line-numbers: "|5|7|8|10"
 #| code-fold: true
 #| output-location: fragment
 
 sample_n <- 10000
 
-x1 <- rnorm(n = sample_n)
-x2 <- rnorm(n = sample_n, 10)
+x <- rnorm(n = sample_n)
 t <- rnorm(sample_n, 5, .5)
-y <- t * 2 + 0.2 * x1 + 0.5 * x2 + rnorm(sample_n)
+y <- t * 2 + 0.2 * x + rnorm(sample_n)
 
-fit_y <- lm(y ~ x1 + x2)
-fit_t <- lm(t ~ x1 + x2)
+fit_t <- lm(t ~ x)
+fit_y <- lm(y ~ x)
 
 fit <- lm(resid(fit_y) ~ resid(fit_t))
 summary(fit)
@@ -179,7 +177,7 @@ Mas peraí, podemos fazer isso?
 
 . . .
 
-Note que o teorema de Frisch-Waugh-Lovell (FWL) vale apenas para o cenário cujas relações são lineares.
+Note que o teorema de Frisch-Waugh-Lovell (FWL) vale apenas para o cenário cujas relações são _lineares_.
 
 . . .
 
@@ -187,17 +185,21 @@ Para nossa felicidade pessoas incríveis já extenderam esses resultados.
 
 . . .
 
-A princípio o resultado do FWL foi extendido para métodos "tradicionais" não-paramétricos, como Lasso (Bickel et al. - 1998).
+A princípio o resultado do FWL foi extendido para métodos "tradicionais" não-paramétricos, como Lasso (Bickel et al, 1998).
 
-Os resultados teóricos nesse momento se limitavam a estimadores que tomassem valor num conjunto de Donsker, o que eliminava muitos dos novos métodos.
+Os resultados teóricos nesse momento se limitavam a estimadores que tomassem valor num conjunto de Donsker, o que eliminava muitos dos 
+novos métodos.
 
 . . .
 
-Mais recentemente, conseguiram expandir os resultados para métodos mais novos como florestas, gradient boosting e outros (Chernozhukov et al. - 2014).
+Mais recentemente, conseguiram expandir os resultados para métodos mais novos como florestas, gradient boosting e outros (Chernozhukov 
+et al. - 2014).
+
+::: {.notes}
+Um conjunto de Donsker, nesse contexto, é um conjunto de variáveis aleatórias IID que, sob certas condições (como uma normalização apropriada), satisfazem as condições do teorema central do limite funcional.
+:::
 
 # Double/Orthgonal Machine Learning {.smaller}
-
-_Sotelo_
 
 ## {.smaller}
 
@@ -207,8 +209,8 @@ Note que no teorema de FWL temos duas etapas intermediárias, que buscam estimar
 
 :::{style="font-size:90%;"}
 $$
-E[Y|X_2] \\
-E[T|X_2]
+E[Y|X] \\
+E[T|X]
 $$
 :::
 
@@ -218,31 +220,191 @@ O que o DML propõe é utilizarmos métodos não paramétricos para estimá-las.
 
 . . .
 
-Com o uso de modelos não paramétricos teríamos uma maneira de contornar as restrições de ter que nos atentar em todos parâmetros, deixando isso para esses modelos intermediários e focar nossa atenção em estimar o parâmetro causal.
+Com o uso de modelos não paramétricos teríamos uma maneira de contornar as restrições de ter que nos atentar em todos parâmetros, 
+deixando isso para esses modelos intermediários e focar nossa atenção em estimar o parâmetro causal.
 
 . . .
 
 Com isso, bastaríamos fazer a regressão linear dos resíduos desses modelos e teríamos o efeito causal $\tau$.
 
-Vale ressaltar que quando analisado o efeito causal, não estamos falando de um efeito linear de fato, mas sim de um efeito linear local, sendo necessario cuidado ao analisá-lo para nao generalizá-lo para todo o intervalo real.
+Vale ressaltar que quando analisado o efeito causal, não estamos falando de um efeito linear de fato, mas sim de um efeito linear local, 
+sendo necessario cuidado ao analisá-lo para nao generalizá-lo para todo o intervalo real.
 
-## Exemplo {.smaller}
+# Pontos de atenção {.smaller}
 
-_Inserir exemplo de aplicação do DML_
-
-# Restrições clássicas de modelos paramétricos {.smaller}
-
-_Renata_
-- Overfitting
+## Pontos de atenção {.smaller}
 
 . . . 
 
-## Possíveis soluções {.smaller}
+Como temos modelos de machine learning envolvidos, temos que nos preocupar com a questão do _overtfitting_. 
 
-- Cross validation
+. . .
+
+No caso do debiased/orthogonal machine learning, temos dois modelos de regressão ($Y\sim X$ e $T\sim X$) com os quais precisamos 
+nos preocupar.
+
+. . .
+
+Falemos um pouco sobre as consequências de sobreajustar $Y\sim X$ e $T\sim X$. Lembremos que o objetivo do DML é ajustar um modelo com os resíduos dos modelos citados.
+
+## {.smaller}
+
+:::{.fragment}
+### Overfit em $Y\sim X$ 
+
+Nesse caso, os resíduos $r_Y$ serão menores do que deveriam. 
+:::
+:::{.fragment}
+Ou seja, além de desconsiderar a relação entre $Y$ e $X$, uma parte da relação entre $Y$ e $T$ será perdida. Consequentemente, os resíduos estarão enviesados em torno do zero, 
+já que haverá pouco a representar para a regressão final que utilizará os resíduos.
+:::
+:::{.fragment}
+### Overfit em $T\sim X$
+
+Se esse modelo for sobreajustado, então $T$ será explicado mais do que deveria por $X$, ou seja, a variância de 
+$T$ será explicada demais por $X$. 
+:::
+:::{.fragment}
+Considerando o modelo final com o resíduo $r_T$, não haverá muita variância restante nesses resíduos e então a variância do estimador 
+final será muito alta, já que será como se todos os valores de $r_T$ fossem iguais.
+:::
+
+## {.smaller}
+
+. . .
+
+Como possivelmente solucionar esses problemas?
+
+. . .
+
+Utilizaremos _cross-validation_!
+
+. . .
+
+Ao invés de utilizar a mesma amostra para estimar e obter os resíduos, dividiremos os dados em k partes iguais.
+
+![](images/cv.png){width=50%}
+
+. . .
+
+O modelo será treinado com k-1 amostras e os resíduos serão calculados utilizando a k-ésima parte, esse processo será realizado 
+para todas as amostras. 
+
+. . .
+
+Desse modo, mesmo com overfitting, os resíduos de cada uma das regressões não serão enviesados, 
+já que usamos uma amostra diferente da qual o modelo foi treinado. 
+
+. . .
+
+Por fim, a estimação final é obtida combinando as predições de todas as k-1 amostras.
 
 
-# Simulação de cenários reais {.smaller}
+# Simulação {.smaller}
+
+## {.smaller}
+
+. . .
+
+Para exemplificar o DML em ação, simularemos dados.
+
+:::{style="font-size:90%;"}
+```{r}
+#| echo: true
+#| code-line-numbers: "|16"
+
+gen_data <- function(n, d, p, delta, base) {
+  X <- matrix(rnorm(n * d), nrow = n, ncol = d)
+  D <- rbinom(n, 1, p)
+  y0 <- base - X[, 1] + rnorm(n, mean = 0, sd = 0.1)
+  y1 <- delta + base - X[, 1] + rnorm(n, mean = 0, sd = 0.1)
+  y <- y1 * D + y0 * (1 - D)
+  return(tibble::tibble(y = y, D = D, X = X))
+}
+
+n <- 3000 # n samples
+d <- 10 # n features
+delta <- 7.0 # treatment effect
+base <- 0.3 # baseline outcome
+
+# Set the random seed for reproducibility
+set.seed(125)
+
+# Generate RCT data
+modelData <- gen_data(n, d, 0.2, delta, base) |>
+  dplyr::mutate(DF = factor(D, levels = c(0, 1)))
+```
+:::
+
+## {.smaller}
+
+Agora faremos os dois modelos intermediários:
+
+:::{style="font-size:90%;"}
+```{r}
+#| echo: true
+#| code-line-numbers: "|1-4|6-11|13-18"
+train_control <- caret::trainControl(
+  method = "adaptive_cv",
+  number = 10,
+  search = "random",
+  verboseIter = FALSE
+)
+
+rfResponseModel <- caret::train(
+  y ~ . - D - DF,
+  method = "ranger",
+  tuneLength = 10,
+  data = modelData,
+  verbose = FALSE,
+  trControl = train_control
+)
+
+rfTreatmentModel <- caret::train(
+  DF ~ . - y - D,
+  method = "ranger",
+  tuneLength = 10,
+  data = modelData,
+  verbose = F,
+  trControl = train_control
+)
+```
+:::
+
+## {.smaller}
+
+Agora vamos calcular os resíduos de ambos os modelos:
+
+:::{style="font-size:90%;"}
+```{r}
+#| echo: true
+#| code-line-numbers: "|16"
+# Predict the response in dataset 1 (2) using model 2 (1).
+responsePredictions <- predict(rfResponseModel,modelData)
+
+# Do the same for the treatment model
+treatmentPredictions <- as.numeric(predict(rfTreatmentModel,modelData))-1
+
+# Calculate the treatment residuals
+treatmentResiduals <- modelData$D - treatmentPredictions
+
+# Calculate the response residuals
+responseResiduals <- modelData$y - responsePredictions
+```
+:::
+
+## {.smaller}
+
+Por fim, faremos o modelo final com os resíduos:
+
+:::{style="font-size:90%;"}
+```{r}
+#| echo: true
+final_model <- lm(responseResiduals~treatmentResiduals)
+
+summary(final_model)
+```
+:::
 
 
-# Referências {.smaller}
+# Obrigado! {.smaller}
