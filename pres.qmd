@@ -343,7 +343,7 @@ Agora faremos os dois modelos intermediários:
 :::{style="font-size:90%;"}
 ```{r}
 #| echo: true
-#| code-line-numbers: "|1-4|6-11|13-18"
+#| code-line-numbers: "|1-6|8-15|17-24"
 train_control <- caret::trainControl(
   method = "adaptive_cv",
   number = 10,
